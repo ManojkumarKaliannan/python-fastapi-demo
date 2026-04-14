@@ -5,6 +5,10 @@ from sqlalchemy.orm import sessionmaker
 
 DATABASE_URL = os.getenv("DATABASE_URL", "sqlite:///./items.db")
 
+# Supabase/Render gives postgres:// but SQLAlchemy needs postgresql://
+if DATABASE_URL.startswith("postgres://"):
+    DATABASE_URL = DATABASE_URL.replace("postgres://", "postgresql://", 1)
+
 # SQLite requires check_same_thread=False; PostgreSQL does not accept it
 connect_args = {"check_same_thread": False} if DATABASE_URL.startswith("sqlite") else {}
 
