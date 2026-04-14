@@ -1,6 +1,10 @@
-# Items API — FastAPI Demo
+# My Notebook API — FastAPI
 
-A simple RESTful API built with **FastAPI** and **SQLAlchemy**, demonstrating CRUD operations on an Items resource. Uses SQLite for local development and can be swapped to PostgreSQL for production.
+A personal notebook REST API built with **FastAPI**, **SQLAlchemy**, and **PostgreSQL (Supabase)**. Write your topics, stories and thoughts — all stored permanently in the cloud.
+
+Live API: [https://python-fastapi-demo-vfm6.onrender.com](https://python-fastapi-demo-vfm6.onrender.com)
+
+Swagger Docs: [https://python-fastapi-demo-vfm6.onrender.com/docs](https://python-fastapi-demo-vfm6.onrender.com/docs)
 
 ---
 
@@ -10,7 +14,9 @@ A simple RESTful API built with **FastAPI** and **SQLAlchemy**, demonstrating CR
 - [SQLAlchemy](https://www.sqlalchemy.org/) — ORM
 - [Uvicorn](https://www.uvicorn.org/) — ASGI server
 - [Pydantic](https://docs.pydantic.dev/) — data validation
-- SQLite (local) / PostgreSQL (production)
+- [Supabase](https://supabase.com/) — PostgreSQL database (production)
+- SQLite — local development
+- [Render](https://render.com/) — hosting
 
 ---
 
@@ -19,7 +25,7 @@ A simple RESTful API built with **FastAPI** and **SQLAlchemy**, demonstrating CR
 ### 1. Clone the repo
 
 ```bash
-git clone https://github.com/your-username/python-fastapi-demo.git
+git clone https://github.com/ManojkumarKaliannan/python-fastapi-demo.git
 cd python-fastapi-demo
 ```
 
@@ -53,53 +59,35 @@ Interactive docs (Swagger UI): `http://localhost:8000/docs`
 | Method | Endpoint | Description |
 |--------|----------|-------------|
 | `GET` | `/` | Health check |
-| `GET` | `/api/items` | List all items |
-| `GET` | `/api/items/{id}` | Get a single item |
-| `POST` | `/api/items` | Create a new item |
-| `DELETE` | `/api/items/{id}` | Delete an item |
+| `GET` | `/api/notes` | Get all notes (newest first) |
+| `GET` | `/api/notes/{id}` | Get a single note |
+| `POST` | `/api/notes` | Create a new note |
+| `PUT` | `/api/notes/{id}` | Update an existing note |
+| `DELETE` | `/api/notes/{id}` | Delete a single note |
+| `DELETE` | `/api/notes` | Delete multiple notes by IDs |
 
-### Example Request
+### Create a note
 
 ```bash
-# Create an item
-curl -X POST http://localhost:8000/api/items \
+curl -X POST https://python-fastapi-demo-vfm6.onrender.com/api/notes \
   -H "Content-Type: application/json" \
-  -d '{"name": "AirPods Pro", "description": "Apple wireless earbuds"}'
+  -d '{"title": "My Topic", "content": "My story goes here..."}'
 ```
 
----
+### Update a note
 
-## Deploying to Render
-
-### 1. Push your code to GitHub
-
-Make sure your `.gitignore` is committed so that `venv/` and `*.db` are excluded.
-
-### 2. Create a new Web Service on Render
-
-1. Go to [render.com](https://render.com) and click **New → Web Service**.
-2. Connect your GitHub repository.
-3. Fill in the settings:
-
-| Setting | Value |
-|---------|-------|
-| **Runtime** | Python 3 |
-| **Build Command** | `pip install -r requirements.txt` |
-| **Start Command** | `uvicorn main:app --host 0.0.0.0 --port $PORT` |
-
-### 3. (Optional) Switch to PostgreSQL
-
-Render provides a managed PostgreSQL database. Once created, copy the **Internal Database URL** and set it as an environment variable:
-
-```
-DATABASE_URL=postgresql://user:password@host:5432/dbname
+```bash
+curl -X PUT https://python-fastapi-demo-vfm6.onrender.com/api/notes/1 \
+  -H "Content-Type: application/json" \
+  -d '{"title": "Updated Topic", "content": "Updated story..."}'
 ```
 
-Then update `database.py` to read from the environment:
+### Delete multiple notes
 
-```python
-import os
-DATABASE_URL = os.getenv("DATABASE_URL", "sqlite:///./items.db")
+```bash
+curl -X DELETE https://python-fastapi-demo-vfm6.onrender.com/api/notes \
+  -H "Content-Type: application/json" \
+  -d '{"ids": [1, 2, 3]}'
 ```
 
 ---
@@ -110,11 +98,48 @@ DATABASE_URL = os.getenv("DATABASE_URL", "sqlite:///./items.db")
 python-fastapi-demo/
 ├── main.py          # FastAPI app, routes, and startup seed
 ├── database.py      # Database engine and session setup
-├── models.py        # SQLAlchemy ORM models
+├── models.py        # Note model (id, title, content, created_at)
 ├── schemas.py       # Pydantic request/response schemas
 ├── requirements.txt # Python dependencies
+├── runtime.txt      # Python version for Render
+├── .python-version  # Python version for Render
 └── .gitignore
 ```
+
+---
+
+## Deploying to Render
+
+### 1. Push code to GitHub
+
+```bash
+git add .
+git commit -m "your message"
+git push
+```
+
+### 2. Create Web Service on Render
+
+| Setting | Value |
+|---------|-------|
+| **Runtime** | Python 3 |
+| **Build Command** | `pip install -r requirements.txt` |
+| **Start Command** | `uvicorn main:app --host 0.0.0.0 --port $PORT` |
+
+### 3. Add environment variable
+
+| Key | Value |
+|-----|-------|
+| `DATABASE_URL` | Your Supabase connection string |
+
+---
+
+## Database
+
+- **Local:** SQLite (`items.db`) — zero setup
+- **Production:** PostgreSQL via [Supabase](https://supabase.com) — free, permanent storage
+
+The app automatically uses SQLite locally and PostgreSQL on Render via the `DATABASE_URL` environment variable.
 
 ---
 
