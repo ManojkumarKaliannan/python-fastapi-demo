@@ -1,15 +1,17 @@
 from pydantic import BaseModel
+from datetime import datetime
 
 
-class ItemCreate(BaseModel):
-    name: str
-    description: str | None = None
+class NoteCreate(BaseModel):
+    title: str
+    content: str | None = None
 
 
-class ItemResponse(BaseModel):
+class NoteResponse(BaseModel):
     id: int
-    name: str
-    description: str | None = None
+    title: str
+    content: str | None = None
+    created_at: datetime
 
     class Config:
         from_attributes = True
